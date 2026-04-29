@@ -10,10 +10,16 @@ export async function GET(
 
   // Security: prevent path traversal
   const safeFilename = path.basename(filename);
-  const filePath = path.join(process.cwd(), "public", "uploads", safeFilename);
+  
+  // No VPS, o process.cwd() pode variar. Vamos garantir um caminho absoluto.
+  const uploadsDir = path.resolve(process.cwd(), "public", "uploads");
+  const filePath = path.join(uploadsDir, safeFilename);
+
+  console.log(`[Uploads API] Tentando ler arquivo: ${filePath}`);
 
   try {
     const fileBuffer = await readFile(filePath);
+    console.log(`[Uploads API] Arquivo encontrado e lido: ${safeFilename}`);
 
     const ext = safeFilename.split(".").pop()?.toLowerCase();
     const contentTypeMap: Record<string, string> = {

@@ -26,8 +26,10 @@ jobs:
             cd /opt/appcandidato
 
             # Remove only untracked source files (preserva uploads e .env)
-            git clean -fd --exclude='public/uploads' --exclude='.env'
+            # Usando caminhos relativos e garantindo que o diretório de uploads não seja tocado
+            git clean -fd -e "public/uploads/*" -e ".env"
             git pull origin main
+
 
             echo "==> Installing dependencies..."
             npm install
