@@ -21,6 +21,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
             echo "==> Pulling latest code..."
             cd /opt/appcandidato
             git pull origin main
@@ -35,7 +36,8 @@ jobs:
             npm run build
 
             echo "==> Restarting PM2..."
-            pm2 restart app-candidato || pm2 start npm --name app-candidato -- run start
+            pm2 delete app-candidato || true
+            PORT=3000 pm2 start npm --name app-candidato -- run start
             pm2 save
 
-            echo "==> Deploy finalizado!"
+            echo "==> Deploy finalizado com sucesso!"
