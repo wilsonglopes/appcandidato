@@ -21,15 +21,9 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            set -e
             echo "==> Pulling latest code..."
             cd /opt/appcandidato
-
-            # Remove only untracked source files (preserva uploads e .env)
-            # Usando caminhos relativos e garantindo que o diretório de uploads não seja tocado
-            git clean -fd -e "public/uploads/*" -e ".env"
             git pull origin main
-
 
             echo "==> Installing dependencies..."
             npm install
@@ -37,17 +31,11 @@ jobs:
             echo "==> Generating Prisma Client..."
             npx prisma generate
 
-
-            echo "==> Building application (clean build)..."
-            rm -rf .next
+            echo "==> Building application..."
             npm run build
 
-            echo "==> Restarting PM2 (cleaning port 3000)..."
-            pm2 stop app-candidato 2>/dev/null || true
-            pm2 delete app-candidato 2>/dev/null || true
-            # Mata qualquer processo zumbi na porta 3000 (comum em Next.js)
-            sudo fuser -k 3000/tcp 2>/dev/null || true
-            PORT=3000 pm2 start npm --name app-candidato -- run start
+            echo "==> Restarting PM2..."
+            pm2 restart app-candidato || pm2 start npm --name app-candidato -- run start
             pm2 save
 
-            echo "==> Deploy concluido com sucesso!"
+            echo "==> Deploy finalizado!"
