@@ -33,7 +33,7 @@ interface User {
   name: string;
   email: string;
   role: string;
-  isBlocked: boolean;
+  isBlocked?: boolean;
   avatarUrl: string | null;
   createdAt: Date;
 }

@@ -19,7 +19,7 @@ export default async function UsersPage() {
       name: true,
       email: true,
       role: true,
-      isBlocked: true,
+      // isBlocked: true,
       avatarUrl: true,
       createdAt: true,
     }
