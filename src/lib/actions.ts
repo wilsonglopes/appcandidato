@@ -361,3 +361,44 @@ export async function registerAction(prevState: string | undefined, formData: Fo
   redirect("/login?registered=true");
 }
 
+export async function changeUserRoleAction(userId: string, newRole: string) {
+  const session = await auth();
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { success: false, error: "Não autorizado." };
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole as any },
+    });
+    revalidatePath("/dashboard/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao mudar cargo:", error);
+    return { success: false, error: "Erro ao atualizar cargo." };
+  }
+}
+
+export async function deleteUserAction(userId: string) {
+  const session = await auth();
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { success: false, error: "Não autorizado." };
+  }
+
+  if (session.user.id === userId) {
+    return { success: false, error: "Você não pode excluir sua própria conta." };
+  }
+
+  try {
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+    revalidatePath("/dashboard/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir usuário:", error);
+    return { success: false, error: "Erro ao excluir colaborador." };
+  }
+}
+
