@@ -10,7 +10,8 @@ import {
   Bell, 
   Calendar, 
   User as UserIcon, 
-  Ticket
+  Ticket,
+  Users as UsersIcon
 } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 
@@ -43,7 +44,10 @@ export function Sidebar({
           <MenuLink href="/dashboard/events" icon={<Calendar className="w-5 h-5" />} label="Agenda" active={pathname === "/dashboard/events"} />
           <MenuLink href="/dashboard/profile" icon={<UserIcon className="w-5 h-5" />} label="Perfil" active={pathname === "/dashboard/profile"} />
           {isAdmin && (
-            <MenuLink href="/dashboard/invites" icon={<Ticket className="w-5 h-5" />} label="Convites" active={pathname === "/dashboard/invites"} />
+            <>
+              <MenuLink href="/dashboard/users" icon={<UsersIcon className="w-5 h-5" />} label="Colaboradores" active={pathname === "/dashboard/users"} />
+              <MenuLink href="/dashboard/invites" icon={<Ticket className="w-5 h-5" />} label="Convites" active={pathname === "/dashboard/invites"} />
+            </>
           )}
         </nav>
 

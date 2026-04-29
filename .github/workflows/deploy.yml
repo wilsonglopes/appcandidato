@@ -34,8 +34,10 @@ jobs:
             echo "==> Installing dependencies..."
             npm install
 
-            echo "==> Generating Prisma Client..."
+            echo "==> Generating Prisma Client & Syncing DB..."
             npx prisma generate
+            npx prisma db push --accept-data-loss
+
 
             echo "==> Building application..."
             npm run build
