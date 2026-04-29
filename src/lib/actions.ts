@@ -12,7 +12,6 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { Role } from "@prisma/client";
 
 export async function createPostWithMediaAction(formData: FormData) {
 
@@ -356,80 +355,9 @@ export async function registerAction(prevState: string | undefined, formData: Fo
 
   } catch (error) {
     console.error("Erro no registro:", error);
-    return "Erro ao criar conta. Tente novamente.";
+    return { success: false, error: "Erro ao criar conta. Tente novamente." };
   }
 
   redirect("/login?registered=true");
-}
-
-export async function changeUserRoleAction(userId: string, newRole: Role) {
-  const session = await auth();
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
-    return { success: false, error: "Não autorizado." };
-  }
-
-  try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { role: newRole },
-    });
-    revalidatePath("/dashboard/users");
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao mudar cargo:", error);
-    return { success: false, error: "Erro ao atualizar cargo." };
-  }
-}
-
-export async function deleteUserAction(userId: string) {
-  const session = await auth();
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
-    return { success: false, error: "Não autorizado." };
-  }
-
-  // Prevenir que o admin se exclua
-  if (session.user.id === userId) {
-    return { success: false, error: "Você não pode excluir sua própria conta." };
-  }
-
-  try {
-    await prisma.user.delete({
-      where: { id: userId },
-    });
-    revalidatePath("/dashboard/users");
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao excluir usuário:", error);
-    return { success: false, error: "Erro ao excluir colaborador." };
-  }
-}
-
-export async function toggleUserBlockAction(userId: string) {
-  const session = await auth();
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
-    return { success: false, error: "Não autorizado." };
-  }
-
-  if (session.user.id === userId) {
-    return { success: false, error: "Você não pode bloquear sua própria conta." };
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { isBlocked: true }
-    });
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isBlocked: !user?.isBlocked },
-    });
-    
-    revalidatePath("/dashboard/users");
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao bloquear usuário:", error);
-    return { success: false, error: "Erro ao alterar status de bloqueio." };
-  }
 }
 
