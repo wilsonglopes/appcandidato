@@ -40,6 +40,12 @@ export default async function DashboardLayout({
   const userName = user?.name || "Apoiador";
   const userInitial = userName.charAt(0).toUpperCase();
   const avatarUrl = user?.avatarUrl || null;
+  const isBlocked = (user as any)?.isBlocked || false;
+
+  if (isBlocked) {
+    redirect("/login?error=blocked");
+  }
+
 
   // Buscar eventos para a sidebar direita
   const upcomingEvents = await prisma.event.findMany({
