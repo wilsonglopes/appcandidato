@@ -22,6 +22,10 @@ export async function GET(
       png: "image/png",
       gif: "image/gif",
       webp: "image/webp",
+      mp4: "video/mp4",
+      webm: "video/webm",
+      ogg: "video/ogg",
+      mov: "video/quicktime",
     };
     const contentType = contentTypeMap[ext ?? ""] ?? "application/octet-stream";
 

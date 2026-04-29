@@ -79,39 +79,6 @@ export async function createPostWithMediaAction(formData: FormData) {
 
 
 
-export async function createPostAction(content: string) {
-  const session = await auth();
-  
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
-    throw new Error("Não autorizado.");
-  }
-
-  if (!content || content.trim().length === 0) {
-    return { success: false, error: "O conteúdo não pode estar vazio." };
-  }
-
-  try {
-    await prisma.post.create({
-      data: {
-        content,
-        authorId: session.user.id!,
-      },
-    });
-
-    // Disparar Notificação
-    await sendNotificationToAll(
-      "Nova Postagem do Candidato! 📢",
-      content.substring(0, 100) + (content.length > 100 ? "..." : ""),
-      "/dashboard"
-    );
-
-    revalidatePath("/dashboard");
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao criar post:", error);
-    return { success: false, error: "Falha ao publicar postagem." };
-  }
-}
 
 export async function toggleLikeAction(postId: string) {
   const session = await auth();
@@ -320,16 +287,16 @@ export async function updateProfileAction(formData: FormData) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const ext = path.extname(file.name);
-      const filename = `avatar-${session.user.id}-${Date.now()}${ext}`;
+      const ext = (path.extname(file.name) || ".jpg").toLowerCase();
+      const sanitizedFilename = `avatar-${session.user.id}-${Date.now()}${ext}`;
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const uploadPath = path.join(uploadsDir, filename);
+      const uploadPath = path.join(uploadsDir, sanitizedFilename);
 
       // Garantir que o diretório existe
       await mkdir(uploadsDir, { recursive: true });
 
       await writeFile(uploadPath, buffer);
-      finalAvatarUrl = `/api/uploads/${filename}`;
+      finalAvatarUrl = `/api/uploads/${sanitizedFilename}`;
     } catch (error) {
       console.error("Erro ao salvar arquivo de avatar:", error);
       // Se falhar o upload, mantemos a URL anterior ou a informada via texto
