@@ -24,6 +24,9 @@ jobs:
             set -e
             echo "==> Pulling latest code..."
             cd /opt/appcandidato
+
+            # Remove only untracked source files (preserva uploads e .env)
+            git clean -fd --exclude='public/uploads' --exclude='.env'
             git pull origin main
 
             echo "==> Installing dependencies..."
