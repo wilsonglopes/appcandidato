@@ -42,8 +42,11 @@ jobs:
             rm -rf .next
             npm run build
 
-            echo "==> Restarting PM2..."
+            echo "==> Restarting PM2 (cleaning port 3000)..."
+            pm2 stop app-candidato 2>/dev/null || true
             pm2 delete app-candidato 2>/dev/null || true
+            # Mata qualquer processo zumbi na porta 3000 (comum em Next.js)
+            sudo fuser -k 3000/tcp 2>/dev/null || true
             PORT=3000 pm2 start npm --name app-candidato -- run start
             pm2 save
 
