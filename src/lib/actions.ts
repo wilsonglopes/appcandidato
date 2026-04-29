@@ -10,6 +10,74 @@ import bcrypt from "bcryptjs";
 import { validateInviteCode } from "./invites";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
+
+export async function createPostWithMediaAction(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { success: false, error: "Não autorizado." };
+  }
+
+  const content = (formData.get("content") as string)?.trim() || "";
+  const imageFile = formData.get("image") as File | null;
+  const videoFile = formData.get("video") as File | null;
+
+  if (!content && !imageFile && !videoFile) {
+    return { success: false, error: "A postagem precisa ter texto ou mídia." };
+  }
+
+  let imageUrl: string | null = null;
+  let videoUrl: string | null = null;
+
+  try {
+    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadsDir, { recursive: true });
+
+    if (imageFile && imageFile.size > 0) {
+      const ext = path.extname(imageFile.name) || ".jpg";
+      const filename = `post-img-${session.user.id}-${Date.now()}${ext}`;
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      await writeFile(path.join(uploadsDir, filename), buffer);
+      imageUrl = `/api/uploads/${filename}`;
+    }
+
+    if (videoFile && videoFile.size > 0) {
+      const ext = path.extname(videoFile.name) || ".mp4";
+      const filename = `post-vid-${session.user.id}-${Date.now()}${ext}`;
+      const buffer = Buffer.from(await videoFile.arrayBuffer());
+      await writeFile(path.join(uploadsDir, filename), buffer);
+      videoUrl = `/api/uploads/${filename}`;
+    }
+
+    await prisma.post.create({
+      data: {
+        content: content || null,
+        imageUrl,
+        videoUrl,
+        authorId: session.user.id!,
+      },
+    });
+
+    // Disparar notificação push
+    const notifText = content
+      ? content.substring(0, 100) + (content.length > 100 ? "..." : "")
+      : imageUrl
+      ? "📸 Nova imagem publicada!"
+      : "🎥 Novo vídeo publicado!";
+
+    await sendNotificationToAll("Nova Postagem do Candidato! 📢", notifText, "/dashboard");
+
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao criar post com mídia:", error);
+    return { success: false, error: "Falha ao publicar postagem." };
+  }
+}
+
+
 
 export async function createPostAction(content: string) {
   const session = await auth();

@@ -12,6 +12,14 @@ export default async function DashboardPage() {
   const userName = session?.user?.name || "Apoiador";
   const isAdmin = (session?.user as any)?.role === "ADMIN";
 
+  // Buscar avatarUrl do usuário logado
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId || "" },
+    select: { avatarUrl: true }
+  });
+  const avatarUrl = currentUser?.avatarUrl;
+
+
   // Buscar posts reais do banco de dados com contagem de likes e se o usuário curtiu
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
@@ -42,7 +50,7 @@ export default async function DashboardPage() {
       <PushNotificationManager />
 
       <div className="space-y-6">
-        {isAdmin && <CreatePostForm userName={userName} />}
+        {isAdmin && <CreatePostForm userName={userName} avatarUrl={avatarUrl} />}
 
         {posts.length === 0 ? (
           <Card className="border-none bg-muted/30 p-10 text-center">
