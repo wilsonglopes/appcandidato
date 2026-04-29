@@ -304,8 +304,6 @@ export async function loginAction(prevState: string | undefined, formData: FormD
   }
 }
 
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 export async function updateProfileAction(formData: FormData) {
   const session = await auth();
