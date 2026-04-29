@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreateInviteButton } from "@/components/invites/create-invite-button";
+import { InviteActions } from "@/components/invites/invite-actions";
 import { Plus, Ticket, CheckCircle2, Circle, Copy, Share2 } from "lucide-react";
 import { redirect } from "next/navigation";
 
@@ -38,7 +39,7 @@ export default async function InvitesPage() {
             </CardContent>
           </Card>
         ) : (
-          invites.map((invite) => (
+          invites.map((invite: any) => (
             <Card key={invite.id} className="overflow-hidden border-none shadow-sm group hover:shadow-md transition-all">
               <div className="flex items-center p-4 sm:p-6 gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${invite.used ? 'bg-green-500/10 text-green-500' : 'bg-primary/10 text-primary'}`}>
@@ -57,20 +58,12 @@ export default async function InvitesPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-2">
-                  {!invite.used && (
-                    <Button size="icon" variant="outline" className="rounded-lg h-9 w-9">
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  )}
-                  <Button size="icon" variant="ghost" className="rounded-lg h-9 w-9">
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                {!invite.used && <InviteActions code={invite.code} />}
               </div>
               {invite.used && (
-                <div className="px-6 pb-4 pt-0 text-[10px] text-muted-foreground border-t bg-muted/5">
-                  ID do Usuário: {invite.usedById}
+                <div className="px-6 pb-4 pt-0 text-[10px] text-muted-foreground border-t bg-muted/5 flex justify-between items-center">
+                  <span>ID do Usuário: {invite.usedById}</span>
+                  <InviteActions code={invite.code} />
                 </div>
               )}
             </Card>

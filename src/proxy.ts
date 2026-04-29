@@ -3,21 +3,18 @@ import { authConfig } from "./auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-export const proxy = auth((req) => {
+export default auth((req) => {
   const { nextUrl } = req;
   const isLogged = !!req.auth;
   
-  console.log(`[Proxy] Rota: ${nextUrl.pathname} | Logado: ${isLogged}`);
-
   const isPublicRoute = ["/", "/login", "/register"].includes(nextUrl.pathname);
+  const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
 
-  if (!isLogged && !isPublicRoute) {
-    console.log(`[Proxy] Redirecionando não logado de ${nextUrl.pathname} para /login`);
+  if (!isLogged && isDashboardRoute) {
     return Response.redirect(new URL("/login", nextUrl));
   }
 
   if (isLogged && isPublicRoute && nextUrl.pathname !== "/") {
-    console.log(`[Proxy] Redirecionando logado de ${nextUrl.pathname} para /dashboard`);
     return Response.redirect(new URL("/dashboard", nextUrl));
   }
 });

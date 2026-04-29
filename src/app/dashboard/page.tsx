@@ -1,16 +1,9 @@
 // Forçando recompilação da página para reconhecer novos campos do Prisma
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { LogoutButton } from "@/components/layout/logout-button";
 import { CreatePostForm } from "@/components/dashboard/create-post-form";
-import { LikeButton } from "@/components/dashboard/like-button";
 import { PushNotificationManager } from "@/components/dashboard/push-manager";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { LogOut, Home, MessageSquare, Bell, User as UserIcon, Plus, Heart, Share2, MessageCircle, Ticket, Calendar } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { PostCard } from "@/components/dashboard/post-card";
 
 export default async function DashboardPage() {
@@ -57,7 +50,7 @@ export default async function DashboardPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {posts.map((post) => (
+            {posts.map((post: any) => (
               <PostCard 
                 key={post.id} 
                 post={post}

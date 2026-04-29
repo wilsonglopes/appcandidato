@@ -4,8 +4,8 @@
   "description": "Rede social privada para apoiadores e militância da campanha.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
   "icons": [
     {
       "src": "/next.svg",

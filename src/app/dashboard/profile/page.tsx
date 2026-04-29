@@ -110,7 +110,7 @@ export default async function ProfilePage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {savedPosts.map((saved) => (
+            {savedPosts.map((saved: any) => (
               <PostCard 
                 key={saved.id} 
                 post={saved.post as any}

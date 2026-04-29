@@ -31,7 +31,7 @@ export default async function EventsPage() {
             <p className="text-muted-foreground text-sm">Nenhum evento agendado no momento.</p>
           </Card>
         ) : (
-          events.map((event) => (
+          events.map((event: any) => (
             <Card key={event.id} className="border-none shadow-sm overflow-hidden group hover:shadow-md transition-all">
               <div className="flex">
                 <div className="w-2 bg-primary" />

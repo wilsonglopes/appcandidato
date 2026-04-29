@@ -35,7 +35,7 @@ export default async function NotificationsPage() {
             <p className="text-muted-foreground text-sm">Você ainda não recebeu nenhuma notificação.</p>
           </Card>
         ) : (
-          notifications.map((notif) => (
+          notifications.map((notif: any) => (
             <Link key={notif.id} href={notif.url || "/dashboard"}>
               <Card className="border-none shadow-sm hover:bg-accent transition-colors cursor-pointer group mb-4">
                 <CardContent className="p-4 flex gap-4">

@@ -14,12 +14,21 @@ import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { MobileNavItem } from "@/components/layout/mobile-nav-item";
+
+import { redirect } from "next/navigation";
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await auth();
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const userId = session?.user?.id;
 
   // Buscar dados reais do usuário (para ter avatarUrl atualizado)
@@ -81,7 +90,7 @@ export default async function DashboardLayout({
                 {upcomingEvents.length === 0 ? (
                   <p className="text-xs text-muted-foreground">Sem eventos próximos.</p>
                 ) : (
-                  upcomingEvents.map(event => (
+                  upcomingEvents.map((event: any) => (
                     <div key={event.id} className="flex items-start gap-3">
                       <div className="w-2 h-2 mt-1.5 rounded-full bg-primary" />
                       <div>
@@ -100,12 +109,12 @@ export default async function DashboardLayout({
       </div>
 
       {/* Bottom Nav Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden glass border-t flex items-center justify-around p-2">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden glass border-t flex items-center justify-around p-2 pb-safe">
         <MobileNavItem href="/dashboard" icon={<Home className="w-6 h-6" />} />
         <MobileNavItem href="/dashboard/messages" icon={<MessageSquare className="w-6 h-6" />} />
         {isAdmin && (
           <div className="relative -top-5">
-             <Button size="icon" className="h-14 w-14 rounded-full shadow-lg shadow-primary/40 border-4 border-background">
+             <Button size="icon" className="h-14 w-14 rounded-full shadow-lg shadow-primary/40 border-4 border-background bg-primary hover:scale-105 transition-transform">
                <Plus className="w-8 h-8" />
              </Button>
           </div>
@@ -114,13 +123,5 @@ export default async function DashboardLayout({
         <MobileNavItem href="/dashboard/profile" icon={<UserIcon className="w-6 h-6" />} />
       </nav>
     </div>
-  );
-}
-
-function MobileNavItem({ href, icon }: { href: string, icon: React.ReactNode }) {
-  return (
-    <Link href={href} className="p-2 text-muted-foreground hover:text-primary transition-colors">
-      {icon}
-    </Link>
   );
 }

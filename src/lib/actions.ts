@@ -250,15 +250,24 @@ export async function updateProfileAction(formData: FormData) {
   let finalAvatarUrl = avatarUrl;
 
   if (file && file.size > 0) {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    try {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
 
-    const ext = path.extname(file.name);
-    const filename = `avatar-${session.user.id}-${Date.now()}${ext}`;
-    const uploadPath = path.join(process.cwd(), "public", "uploads", filename);
+      const ext = path.extname(file.name);
+      const filename = `avatar-${session.user.id}-${Date.now()}${ext}`;
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      const uploadPath = path.join(uploadsDir, filename);
 
-    await writeFile(uploadPath, buffer);
-    finalAvatarUrl = `/uploads/${filename}`;
+      // Garantir que o diretório existe
+      await mkdir(uploadsDir, { recursive: true });
+
+      await writeFile(uploadPath, buffer);
+      finalAvatarUrl = `/api/uploads/${filename}`;
+    } catch (error) {
+      console.error("Erro ao salvar arquivo de avatar:", error);
+      // Se falhar o upload, mantemos a URL anterior ou a informada via texto
+    }
   }
 
   await prisma.user.update({
@@ -270,6 +279,7 @@ export async function updateProfileAction(formData: FormData) {
   });
 
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard"); // Para atualizar a sidebar em todo lugar
   return { success: true };
 }
 
