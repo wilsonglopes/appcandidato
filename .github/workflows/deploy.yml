@@ -38,7 +38,8 @@ jobs:
             npx prisma generate
 
 
-            echo "==> Building application..."
+            echo "==> Building application (clean build)..."
+            rm -rf .next
             npm run build
 
             echo "==> Restarting PM2..."
