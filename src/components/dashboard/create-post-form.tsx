@@ -109,7 +109,6 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   ref={imageInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/gif,image/webp"
-                  capture="environment"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -132,7 +131,6 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   ref={videoInputRef}
                   type="file"
                   accept="video/mp4,video/webm,video/ogg,video/quicktime"
-                  capture="environment"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
