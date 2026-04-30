@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   title: "Zé Milton | Conectando Apoiadores",
   description: "Uma rede social privada para organização e engajamento da equipe.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    title: "Zé Milton",
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: "/icon.jpg",
+  },
 };
 
 export const viewport: Viewport = {
