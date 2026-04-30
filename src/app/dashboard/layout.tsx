@@ -8,7 +8,8 @@ import {
   User as UserIcon, 
   Plus,
   Calendar,
-  Users
+  Users,
+  Ticket
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -72,13 +73,22 @@ export default async function DashboardLayout({
               <h1 className="text-xl font-heading font-bold text-primary">{process.env.NEXT_PUBLIC_APP_NAME || "Zé Milton"}</h1>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privado & Seguro</p>
             </div>
-            <Avatar className="h-8 w-8">
-              {avatarUrl ? (
-                <AvatarImage src={avatarUrl} />
-              ) : (
-                <AvatarFallback className="bg-primary/10 text-primary">{userInitial}</AvatarFallback>
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Link href="/dashboard/invites" className="p-2 text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                  <Ticket className="w-5 h-5" />
+                </Link>
               )}
-            </Avatar>
+              <Link href="/dashboard/profile">
+                <Avatar className="h-8 w-8">
+                  {avatarUrl ? (
+                    <AvatarImage src={avatarUrl} />
+                  ) : (
+                    <AvatarFallback className="bg-primary/10 text-primary">{userInitial}</AvatarFallback>
+                  )}
+                </Avatar>
+              </Link>
+            </div>
           </header>
 
           <div className="pb-20 lg:pb-0">
