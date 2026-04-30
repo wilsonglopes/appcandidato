@@ -16,6 +16,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
   const [isPending, startTransition] = useTransition();
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const userInitial = userName.charAt(0).toUpperCase();
 
@@ -38,6 +39,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
     setMediaPreview(null);
     setMediaType(null);
     if (imageInputRef.current) imageInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
@@ -103,12 +105,35 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
             )}
 
             <div className="flex items-center justify-between pt-2 border-t border-muted/50">
-              <div className="flex gap-2">
-                {/* Input de imagem */}
+              <div className="flex gap-1 sm:gap-2">
+                {/* Input de Galeria (Geral) */}
                 <input
                   ref={imageInputRef}
                   type="file"
                   accept="image/*,video/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file, file.type.startsWith('image') ? 'image' : 'video');
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={isPending}
+                  title="Galeria"
+                >
+                  <ImageIcon className="w-6 h-6" />
+                </Button>
+
+                {/* Input de Câmera (Foto) */}
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -118,19 +143,20 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-9 w-9 rounded-lg transition-colors ${mediaType === "image" ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary hover:bg-primary/10"}`}
-                  onClick={() => imageInputRef.current?.click()}
+                  className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  onClick={() => cameraInputRef.current?.click()}
                   disabled={isPending}
-                  title="Adicionar imagem"
+                  title="Câmera"
                 >
-                  <ImageIcon className="w-6 h-6" />
+                  <Send className="w-6 h-6 -rotate-90" /> {/* Ícone sugestivo para câmera/foto */}
                 </Button>
 
-                {/* Input de vídeo */}
+                {/* Input de Câmera (Vídeo) */}
                 <input
                   ref={videoInputRef}
                   type="file"
-                  accept="image/*,video/*"
+                  accept="video/*"
+                  capture="environment"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -140,10 +166,10 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-9 w-9 rounded-lg transition-colors ${mediaType === "video" ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary hover:bg-primary/10"}`}
+                  className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/10"
                   onClick={() => videoInputRef.current?.click()}
                   disabled={isPending}
-                  title="Adicionar vídeo"
+                  title="Gravar Vídeo"
                 >
                   <Video className="w-6 h-6" />
                 </Button>

@@ -25,6 +25,7 @@ export function QuickActionButton() {
         ref={videoInputRef}
         type="file"
         accept="image/*,video/*"
+        capture="environment"
         className="hidden"
         onChange={handleFileChange}
       />

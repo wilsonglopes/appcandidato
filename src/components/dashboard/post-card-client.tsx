@@ -276,22 +276,29 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
         )}
       </CardContent>
 
-      <CardFooter className="border-t pt-3 flex items-center justify-between text-muted-foreground">
+      <CardFooter className="border-t pt-3 flex items-center justify-between text-muted-foreground px-4">
         <LikeButton postId={post.id} initialLikes={post._count.likes} initialHasLiked={post.likes.length > 0} />
         
-        <button 
+        <Button 
+          variant="ghost"
+          size="sm"
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-2 text-xs hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-xs hover:text-primary transition-colors h-8"
         >
-          <MessageCircle className="w-4 h-4" /> Comentar ({comments.length})
-        </button>
+          <MessageCircle className="w-4 h-4" /> 
+          <span className="hidden xs:inline">Comentar</span>
+          <span>({comments.length})</span>
+        </Button>
         
-        <button 
+        <Button 
+          variant="ghost"
+          size="sm"
           onClick={handleShare}
-          className="flex items-center gap-2 text-xs hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-xs hover:text-primary transition-colors h-8"
         >
-          <Share2 className="w-4 h-4" /> Compartilhar
-        </button>
+          <Share2 className="w-4 h-4" /> 
+          <span>Compartilhar</span>
+        </Button>
       </CardFooter>
 
       {showComments && (
