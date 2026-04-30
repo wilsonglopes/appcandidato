@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { InstallPwaBanner } from "@/components/pwa/install-banner";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background font-sans">
         {children}
+        <InstallPwaBanner />
         <Toaster richColors position="top-center" />
       </body>
     </html>
