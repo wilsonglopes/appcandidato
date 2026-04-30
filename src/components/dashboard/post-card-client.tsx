@@ -36,13 +36,11 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content || "");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
 
   const isAdmin = currentUserRole === "ADMIN";
-  // Na verdade, qualquer Admin deveria poder apagar? O usuário pediu "para o administrador"
-  // Vamos assumir que se o usuário logado for ADMIN, ele pode gerenciar.
-  // Mas para simplicidade, vamos checar se o role do usuário logado é ADMIN (precisaríamos passar isso)
-  // Por agora, vamos usar a informação do post.author.role se for o próprio, ou assumir permissão.
+  const isAuthor = currentUserId === post.author.id;
 
   const handleEdit = async () => {
     if (!editContent.trim() || isActionPending) return;
@@ -166,7 +164,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
             <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
           </Button>
 
-          {isAdmin && (
+          {(isAdmin || (post.imageUrl || post.videoUrl)) && (
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
@@ -176,12 +174,21 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
                 }
               />
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem onClick={() => setIsEditing(true)} className="gap-2">
-                  <Pencil className="w-4 h-4" /> Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsDeleting(true)} className="gap-2 text-destructive focus:text-destructive">
-                  <Trash2 className="w-4 h-4" /> Excluir
-                </DropdownMenuItem>
+                {(post.imageUrl || post.videoUrl) && (
+                  <DropdownMenuItem onClick={handleDownload} className="gap-2">
+                    <Download className="w-4 h-4" /> Baixar Mídia
+                  </DropdownMenuItem>
+                )}
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem onClick={() => setIsEditing(true)} className="gap-2">
+                      <Pencil className="w-4 h-4" /> Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsDeleting(true)} className="gap-2 text-destructive focus:text-destructive">
+                      <Trash2 className="w-4 h-4" /> Excluir
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -231,27 +238,40 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog de Preview de Imagem */}
+        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+          <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/90 border-none">
+            <div className="relative w-full h-full flex items-center justify-center p-4">
+               {post.imageUrl && (
+                 <img src={post.imageUrl} alt="Full preview" className="max-w-full max-h-[85vh] object-contain rounded-lg" />
+               )}
+               {post.videoUrl && (
+                 <video src={post.videoUrl} controls autoPlay className="max-w-full max-h-[85vh] rounded-lg" />
+               )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <p className="text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
         
         {(post.imageUrl || post.videoUrl) && (
-          <div className="relative group">
+          <div className="relative group cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
             {post.imageUrl && (
-              <img src={post.imageUrl} alt="Post content" className="rounded-xl w-full object-cover max-h-96" />
+              <img src={post.imageUrl} alt="Post content" className="rounded-xl w-full object-cover max-h-96 transition-transform hover:scale-[1.01]" />
             )}
             {post.videoUrl && (
-              <video src={post.videoUrl} controls className="rounded-xl w-full max-h-96" />
+              <div className="relative">
+                <video src={post.videoUrl} className="rounded-xl w-full max-h-96 object-cover" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <div className="bg-white/20 backdrop-blur-md p-4 rounded-full">
+                      <MoreVertical className="w-8 h-8 text-white rotate-90" />
+                   </div>
+                </div>
+              </div>
             )}
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity gap-2"
-              onClick={handleDownload}
-            >
-              <Download className="w-4 h-4" /> Baixar
-            </Button>
           </div>
         )}
       </CardContent>
