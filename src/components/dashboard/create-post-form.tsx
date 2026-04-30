@@ -109,6 +109,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   ref={imageInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/gif,image/webp"
+                  capture="environment"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -123,7 +124,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   disabled={isPending}
                   title="Adicionar imagem"
                 >
-                  <ImageIcon className="w-5 h-5" />
+                  <ImageIcon className="w-6 h-6" />
                 </Button>
 
                 {/* Input de vídeo */}
@@ -131,6 +132,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   ref={videoInputRef}
                   type="file"
                   accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                  capture="environment"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -145,7 +147,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   disabled={isPending}
                   title="Adicionar vídeo"
                 >
-                  <Video className="w-5 h-5" />
+                  <Video className="w-6 h-6" />
                 </Button>
               </div>
 

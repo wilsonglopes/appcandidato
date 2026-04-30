@@ -15,6 +15,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { MobileNavItem } from "@/components/layout/mobile-nav-item";
+import { QuickActionButton } from "@/components/layout/quick-action-button";
 
 import { redirect } from "next/navigation";
 
@@ -116,13 +117,7 @@ export default async function DashboardLayout({
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden glass border-t flex items-center justify-around p-2 pb-safe">
         <MobileNavItem href="/dashboard" icon={<Home className="w-6 h-6" />} />
         <MobileNavItem href="/dashboard/messages" icon={<MessageSquare className="w-6 h-6" />} />
-        {isAdmin && (
-          <div className="relative -top-5">
-             <Button size="icon" className="h-14 w-14 rounded-full shadow-lg shadow-primary/40 border-4 border-background bg-primary hover:scale-105 transition-transform">
-               <Plus className="w-8 h-8" />
-             </Button>
-          </div>
-        )}
+        {isAdmin && <QuickActionButton />}
         <MobileNavItem href="/dashboard/notifications" icon={<Bell className="w-6 h-6" />} />
         <MobileNavItem href="/dashboard/profile" icon={<UserIcon className="w-6 h-6" />} />
       </nav>
