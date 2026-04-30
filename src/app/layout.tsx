@@ -14,8 +14,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "App Candidato | Conectando Apoiadores",
-  description: "A rede social exclusiva e segura para apoiadores e voluntários de campanha.",
+  title: "Zé Milton | Conectando Apoiadores",
+  description: "Uma rede social privada para organização e engajamento da equipe.",
   manifest: "/manifest.json",
 };
 

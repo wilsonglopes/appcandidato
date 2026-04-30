@@ -1,7 +1,7 @@
 {
-  "name": "App Candidato",
-  "short_name": "Candidato",
-  "description": "Rede social privada para apoiadores e militância da campanha.",
+  "name": "Zé Milton",
+  "short_name": "Zé Milton",
+  "description": "Uma rede social privada para organização e engajamento da equipe.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#f8fafc",

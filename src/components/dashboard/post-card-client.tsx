@@ -151,37 +151,57 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
   };
 
   const handleShare = async () => {
-    const shareUrl = window.location.origin + "/dashboard";
-    const shareText = post.content || "Veja esta postagem da campanha!";
-    const shareData = {
-      title: "App do Candidato",
+    const shareText = post.content ? post.content : "";
+    const mediaUrl = post.imageUrl || post.videoUrl;
+    
+    let shareData: any = {
       text: shareText,
-      url: shareUrl
     };
 
-    // Tentar Navigator Share (Apenas HTTPS)
-    if (navigator.share) {
-      try {
+    let toastId;
+
+    try {
+      if (mediaUrl) {
+        toastId = toast.loading("Preparando mídia para compartilhar...");
+        const response = await fetch(mediaUrl);
+        const blob = await response.blob();
+        
+        const ext = mediaUrl.split('.').pop() || (post.imageUrl ? 'jpg' : 'mp4');
+        const filename = `midia-${post.id}.${ext}`;
+        const file = new File([blob], filename, { type: blob.type });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          shareData.files = [file];
+        }
+      }
+
+      if (navigator.share) {
+        if (toastId) toast.dismiss(toastId);
         await navigator.share(shareData);
         return;
-      } catch (err) {
-        console.log("Erro ao compartilhar via Navigator:", err);
       }
+    } catch (err) {
+      console.log("Erro ao compartilhar via Navigator:", err);
     }
 
-    // Fallback 1: Clipboard (Apenas HTTPS)
+    if (toastId) toast.dismiss(toastId);
+
+    // Fallback: Copiar apenas o texto
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-        toast.success("Link e texto copiados!");
+        await navigator.clipboard.writeText(shareText);
+        toast.success(mediaUrl ? "Texto copiado! (Seu navegador não suporta envio direto da mídia)" : "Texto copiado para a área de transferência!");
         return;
       }
     } catch (err) {
       console.log("Erro ao copiar via Clipboard:", err);
     }
 
-    // Fallback 2: Prompt (Funciona em HTTP/IP)
-    window.prompt("Copie o link abaixo para compartilhar:", `${shareText} ${shareUrl}`);
+    if (shareText) {
+      window.prompt("Copie o texto abaixo para compartilhar:", shareText);
+    } else {
+      toast.error("Não foi possível compartilhar.");
+    }
   };
 
   const handleDownload = () => {
@@ -416,7 +436,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
               className="h-9 text-xs bg-muted/50 border-none rounded-full"
               disabled={isSubmitting}
             />
-            <Button size="icon" className="h-9 w-9 rounded-full shrink-0" disabled={!commentContent.trim() || isSubmitting}>
+            <Button type="submit" size="icon" className="h-9 w-9 rounded-full shrink-0" disabled={!commentContent.trim() || isSubmitting}>
               <Send className="w-4 h-4" />
             </Button>
           </form>

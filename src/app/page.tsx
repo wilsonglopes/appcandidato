@@ -25,8 +25,8 @@ export default function Home() {
           </h1>
           
           <p className="max-w-2xl mx-auto text-lg lg:text-xl text-muted-foreground mb-10 leading-relaxed">
-            Bem-vindo ao App Candidato. Uma plataforma privada para apoiadores, 
-            voluntários e a equipe oficial da nossa caminhada.
+            Bem-vindo ao {process.env.NEXT_PUBLIC_APP_NAME || "Zé Milton"}. Uma plataforma privada para apoiadores, 
+            equipe e voluntários.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in" style={{ animationDelay: '0.2s' }}>

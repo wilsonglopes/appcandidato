@@ -33,7 +33,12 @@ export function Sidebar({
     <aside className="hidden lg:flex w-72 border-r flex-col p-6 sticky top-0 h-screen glass">
       <div className="flex flex-col h-full">
         <div className="mb-10">
-          <h1 className="text-2xl font-heading font-bold text-primary">App Candidato</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xl">Z</span>
+            </div>
+            <h1 className="text-2xl font-heading font-bold text-primary">{process.env.NEXT_PUBLIC_APP_NAME || "Zé Milton"}</h1>
+          </div>
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privado & Seguro</p>
         </div>
         

@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function generateInviteCode() {
+async function generateInviteCode() {
   const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No O, 0, I, 1
   let result = '';
   for (let i = 0; i < 8; i++) {

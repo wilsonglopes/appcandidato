@@ -68,7 +68,10 @@ export default async function DashboardLayout({
         <main className="flex-1 lg:max-w-2xl lg:border-r mx-auto w-full">
           {/* Mobile Header */}
           <header className="sticky top-0 z-30 flex items-center justify-between p-4 glass lg:hidden">
-            <h1 className="text-xl font-heading font-bold text-primary">App Candidato</h1>
+            <div className="flex flex-col">
+              <h1 className="text-xl font-heading font-bold text-primary">{process.env.NEXT_PUBLIC_APP_NAME || "Zé Milton"}</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privado & Seguro</p>
+            </div>
             <Avatar className="h-8 w-8">
               {avatarUrl ? (
                 <AvatarImage src={avatarUrl} />

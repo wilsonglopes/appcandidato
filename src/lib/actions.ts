@@ -208,42 +208,6 @@ export async function toggleSaveAction(postId: string) {
   }
 }
 
-export async function createEventAction(formData: FormData) {
-  const session = await auth();
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
-    throw new Error("Não autorizado.");
-  }
-
-  const data = Object.fromEntries(formData);
-  const { title, description, location, date, type } = data as Record<string, string>;
-
-  try {
-    await prisma.event.create({
-      data: {
-        title,
-        description,
-        location,
-        date: new Date(date),
-        type,
-        authorId: session.user.id!,
-      },
-    });
-
-    // Disparar Notificação de Evento
-    await sendNotificationToAll(
-      `Novo Evento: ${title} 🗓️`,
-      `Dia ${new Date(date).toLocaleDateString('pt-BR')} às ${new Date(date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} em ${location}`,
-      "/dashboard/events"
-    );
-
-    revalidatePath("/dashboard");
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao criar evento:", error);
-    return { success: false, error: "Falha ao criar evento." };
-  }
-}
-
 export async function registerPushAction(subscription: any) {
   const session = await auth();
   if (!session?.user) throw new Error("Não autorizado.");
