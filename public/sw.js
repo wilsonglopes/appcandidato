@@ -14,8 +14,8 @@ self.addEventListener('push', function(event) {
   const data = event.data.json();
   const options = {
     body: data.body,
-    icon: '/next.svg',
-    badge: '/next.svg',
+    icon: '/icon-192x192.png',
+    badge: '/icon-192x192.png',
     data: {
       url: data.url || '/dashboard'
     }
