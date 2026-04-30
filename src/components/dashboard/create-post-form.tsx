@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createPostWithMediaAction } from "@/lib/actions";
-import { Send, Image as ImageIcon, Video, Loader2, X } from "lucide-react";
+import { Send, Image as ImageIcon, Video, Loader2, X, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 
 export function CreatePostForm({ userName, avatarUrl }: { userName: string; avatarUrl?: string | null }) {
@@ -125,7 +125,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   disabled={isPending}
                   title="Galeria"
                 >
-                  <ImageIcon className="w-6 h-6" />
+                  <Paperclip className="w-6 h-6" />
                 </Button>
 
                 {/* Input de Câmera (Foto) */}
@@ -148,7 +148,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                   disabled={isPending}
                   title="Câmera"
                 >
-                  <Send className="w-6 h-6 -rotate-90" /> {/* Ícone sugestivo para câmera/foto */}
+                  <ImageIcon className="w-6 h-6" />
                 </Button>
 
                 {/* Input de Câmera (Vídeo) */}

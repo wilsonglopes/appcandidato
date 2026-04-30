@@ -25,7 +25,10 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
+import { useRouter } from "next/navigation";
+
 export function PostCardClient({ post, initialComments, initialIsSaved, currentUserId, currentUserRole }: any) {
+  const router = useRouter();
   const [showComments, setShowComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const [comments, setComments] = useState(initialComments);
@@ -49,6 +52,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
     if (result.success) {
       toast.success("Postagem atualizada!");
       setIsEditing(false);
+      router.refresh();
     } else {
       toast.error(result.error || "Erro ao editar.");
     }
@@ -62,7 +66,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
     if (result.success) {
       toast.success("Postagem excluída.");
       setIsDeleting(false);
-      // O revalidatePath cuidará do refresh, mas poderíamos esconder localmente se quiséssemos.
+      router.refresh();
     } else {
       toast.error(result.error || "Erro ao excluir.");
     }
@@ -77,19 +81,15 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
     const result = await createCommentAction(post.id, commentContent);
     
     if (result.success) {
-      // Adição otimista (simulada)
-      const newComment = {
+      setComments([...comments, {
         id: Math.random().toString(),
         content: commentContent,
         createdAt: new Date(),
-        author: { 
-          name: "Você", 
-          avatarUrl: (result as any).userAvatar || null 
-        }
-      };
-      setComments([...comments, newComment]);
+        author: { name: "Você", avatarUrl: (result as any).userAvatar || null }
+      }]);
       setCommentContent("");
       toast.success("Comentário enviado!");
+      router.refresh();
     } else {
       toast.error("Erro ao comentar.");
     }
@@ -108,18 +108,25 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
   };
 
   const handleShare = async () => {
+    const shareData = {
+      title: "App do Candidato",
+      text: post.content || "Veja esta postagem da campanha!",
+      url: window.location.origin + "/dashboard"
+    };
+
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: "Mensagem da Campanha",
-          text: post.content,
-        });
+        await navigator.share(shareData);
       } catch (err) {
         console.log("Erro ao compartilhar:", err);
       }
     } else {
-      navigator.clipboard.writeText(post.content);
-      toast.success("Texto copiado!");
+      try {
+        await navigator.clipboard.writeText(shareData.text + " " + shareData.url);
+        toast.success("Link e texto copiados!");
+      } catch (err) {
+        toast.error("Erro ao copiar.");
+      }
     }
   };
 

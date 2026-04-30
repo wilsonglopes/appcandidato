@@ -142,6 +142,7 @@ export async function createCommentAction(postId: string, content: string) {
     });
 
     revalidatePath("/dashboard");
+    revalidatePath("/");
     return { success: true, userAvatar: user?.avatarUrl };
   } catch (error) {
     console.error("Erro ao comentar:", error);
