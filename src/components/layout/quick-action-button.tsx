@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useTransition } from "react";
-import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Camera, Video, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createPostWithMediaAction } from "@/lib/actions";
@@ -79,18 +78,15 @@ export function QuickActionButton() {
       />
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            size="icon" 
-            className="h-14 w-14 rounded-full shadow-lg shadow-primary/40 border-4 border-background bg-primary hover:scale-105 active:scale-95 transition-all outline-none"
-            disabled={isPending}
-          >
-            {isPending ? (
-              <Loader2 className="w-8 h-8 animate-spin" />
-            ) : (
-              <Plus className="w-8 h-8" />
-            )}
-          </Button>
+        <DropdownMenuTrigger
+          className="h-14 w-14 rounded-full shadow-lg shadow-primary/40 border-4 border-background bg-primary text-primary-foreground hover:scale-105 active:scale-95 transition-all outline-none flex items-center justify-center"
+          disabled={isPending}
+        >
+          {isPending ? (
+            <Loader2 className="w-8 h-8 animate-spin" />
+          ) : (
+            <Plus className="w-8 h-8" />
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center" side="top" className="mb-2 p-2 rounded-2xl shadow-xl w-48">
           <DropdownMenuItem 
