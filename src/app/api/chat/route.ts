@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Inicializa o cliente DeepSeek (compatível com OpenAI)
-const openai = new OpenAI({
-  baseURL: 'https://api.deepseek.com/v1',
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Inicializa o cliente DeepSeek (compatível com OpenAI) dentro da função
+  const openai = new OpenAI({
+    baseURL: 'https://api.deepseek.com/v1',
+    apiKey: process.env.DEEPSEEK_API_KEY,
+  });
+
   try {
     const { message } = await request.json();
 
