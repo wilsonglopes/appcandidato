@@ -402,3 +402,40 @@ export async function deleteUserAction(userId: string) {
   }
 }
 
+export async function deletePostAction(postId: string) {
+  const session = await auth();
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { success: false, error: "Não autorizado." };
+  }
+
+  try {
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir postagem:", error);
+    return { success: false, error: "Erro ao excluir postagem." };
+  }
+}
+
+export async function updatePostAction(postId: string, content: string) {
+  const session = await auth();
+  if (!session?.user || (session.user as any).role !== "ADMIN") {
+    return { success: false, error: "Não autorizado." };
+  }
+
+  try {
+    await prisma.post.update({
+      where: { id: postId },
+      data: { content },
+    });
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao editar postagem:", error);
+    return { success: false, error: "Erro ao editar postagem." };
+  }
+}
+

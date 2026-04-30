@@ -33,6 +33,7 @@ export async function PostCard({ post }: { post: any }) {
       initialComments={comments} 
       initialIsSaved={!!isSaved}
       currentUserId={userId}
+      currentUserRole={(session?.user as any)?.role}
     />
   );
 }

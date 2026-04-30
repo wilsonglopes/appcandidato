@@ -7,16 +7,69 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LikeButton } from "./like-button";
-import { MessageCircle, Share2, Bookmark, Download, Send } from "lucide-react";
-import { createCommentAction, toggleSaveAction } from "@/lib/actions";
+import { MessageCircle, Share2, Bookmark, Download, Send, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { createCommentAction, toggleSaveAction, deletePostAction, updatePostAction } from "@/lib/actions";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
-export function PostCardClient({ post, initialComments, initialIsSaved, currentUserId }: any) {
+export function PostCardClient({ post, initialComments, initialIsSaved, currentUserId, currentUserRole }: any) {
   const [showComments, setShowComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const [comments, setComments] = useState(initialComments);
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados para edição e exclusão
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content || "");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isActionPending, setIsActionPending] = useState(false);
+
+  const isAdmin = currentUserRole === "ADMIN";
+  // Na verdade, qualquer Admin deveria poder apagar? O usuário pediu "para o administrador"
+  // Vamos assumir que se o usuário logado for ADMIN, ele pode gerenciar.
+  // Mas para simplicidade, vamos checar se o role do usuário logado é ADMIN (precisaríamos passar isso)
+  // Por agora, vamos usar a informação do post.author.role se for o próprio, ou assumir permissão.
+
+  const handleEdit = async () => {
+    if (!editContent.trim() || isActionPending) return;
+    setIsActionPending(true);
+    const result = await updatePostAction(post.id, editContent);
+    if (result.success) {
+      toast.success("Postagem atualizada!");
+      setIsEditing(false);
+    } else {
+      toast.error(result.error || "Erro ao editar.");
+    }
+    setIsActionPending(false);
+  };
+
+  const handleDelete = async () => {
+    if (isActionPending) return;
+    setIsActionPending(true);
+    const result = await deletePostAction(post.id);
+    if (result.success) {
+      toast.success("Postagem excluída.");
+      setIsDeleting(false);
+      // O revalidatePath cuidará do refresh, mas poderíamos esconder localmente se quiséssemos.
+    } else {
+      toast.error(result.error || "Erro ao excluir.");
+    }
+    setIsActionPending(false);
+  };
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,14 +156,81 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
             {new Date(post.createdAt).toLocaleDateString('pt-BR')}
           </p>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className={`h-8 w-8 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`}
-          onClick={handleSave}
-        >
-          <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`h-8 w-8 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`}
+            onClick={handleSave}
+          >
+            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+          </Button>
+
+          {isAdmin && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={() => setIsEditing(true)} className="gap-2">
+                  <Pencil className="w-4 h-4" /> Editar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsDeleting(true)} className="gap-2 text-destructive focus:text-destructive">
+                  <Trash2 className="w-4 h-4" /> Excluir
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+
+        {/* Dialog de Edição */}
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar Postagem</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea 
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="min-h-[120px]"
+                placeholder="O que você quer dizer?"
+              />
+            </div>
+            <DialogFooter className="flex-row justify-end gap-2">
+              <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isActionPending}>
+                Cancelar
+              </Button>
+              <Button onClick={handleEdit} disabled={isActionPending || !editContent.trim()}>
+                {isActionPending ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de Exclusão */}
+        <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Excluir Postagem?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground py-2">
+              Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita.
+            </p>
+            <DialogFooter className="flex-row justify-end gap-2">
+              <Button variant="ghost" onClick={() => setIsDeleting(false)} disabled={isActionPending}>
+                Manter
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={isActionPending}>
+                {isActionPending ? "Excluindo..." : "Sim, Excluir"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
 
       <CardContent className="space-y-4">
