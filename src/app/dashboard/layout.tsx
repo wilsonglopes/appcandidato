@@ -7,7 +7,8 @@ import {
   Bell, 
   User as UserIcon, 
   Plus,
-  Calendar
+  Calendar,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -116,7 +117,7 @@ export default async function DashboardLayout({
       {/* Bottom Nav Mobile */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden glass border-t flex items-center justify-around p-2 pb-safe">
         <MobileNavItem href="/dashboard" icon={<Home className="w-6 h-6" />} />
-        <MobileNavItem href="/dashboard/messages" icon={<MessageSquare className="w-6 h-6" />} />
+        <MobileNavItem href="/dashboard/users" icon={<Users className="w-6 h-6" />} />
         {isAdmin && <QuickActionButton />}
         <MobileNavItem href="/dashboard/notifications" icon={<Bell className="w-6 h-6" />} />
         <MobileNavItem href="/dashboard/profile" icon={<UserIcon className="w-6 h-6" />} />
