@@ -355,7 +355,7 @@ export async function registerAction(prevState: string | undefined, formData: Fo
 
   } catch (error) {
     console.error("Erro no registro:", error);
-    return { success: false, error: "Erro ao criar conta. Tente novamente." };
+    return "Erro ao criar conta. Tente novamente.";
   }
 
   redirect("/login?registered=true");
