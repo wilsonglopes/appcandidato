@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LikeButton } from "./like-button";
 import { MessageCircle, Share2, Bookmark, Download, Send, MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { createCommentAction, toggleSaveAction, deletePostAction, updatePostAction } from "@/lib/actions";
+import { 
+  createCommentAction, 
+  deletePostAction, 
+  toggleSaveAction, 
+  updatePostAction,
+  getLinkMetadataAction 
+} from "@/lib/actions";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -34,6 +40,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
   const [comments, setComments] = useState(initialComments);
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const commentInputRef = useRef<HTMLInputElement>(null);
 
   // Estados para edição e exclusão
   const [isEditing, setIsEditing] = useState(false);
@@ -44,6 +51,39 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
 
   const isAdmin = currentUserRole === "ADMIN";
   const isAuthor = currentUserId === post.author.id;
+
+  const [linkMetadata, setLinkMetadata] = useState<any>(null);
+
+  // Detectar link e buscar metadados
+  useEffect(() => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const match = post.content?.match(urlRegex);
+    if (match && match[0]) {
+      getLinkMetadataAction(match[0]).then(res => {
+        if (res.success) setLinkMetadata(res.metadata);
+      });
+    }
+  }, [post.content]);
+
+  // Função para renderizar texto com links clicáveis
+  const renderContent = (text: string) => {
+    if (!text) return null;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) => {
+      if (part.match(urlRegex)) {
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{part}</a>;
+      }
+      return part;
+    });
+  };
+
+  // Focar no input quando abrir comentários
+  useEffect(() => {
+    if (showComments && commentInputRef.current) {
+      commentInputRef.current.focus();
+    }
+  }, [showComments]);
 
   const handleEdit = async () => {
     if (!editContent.trim() || isActionPending) return;
@@ -73,24 +113,27 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
     setIsActionPending(false);
   };
 
-  const handleComment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleComment = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!commentContent.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
-    const result = await createCommentAction(post.id, commentContent);
+    const contentToSubmit = commentContent;
+    setCommentContent(""); // Limpar logo para UX
+
+    const result = await createCommentAction(post.id, contentToSubmit);
     
     if (result.success) {
       setComments([...comments, {
         id: Math.random().toString(),
-        content: commentContent,
+        content: contentToSubmit,
         createdAt: new Date(),
         author: { name: "Você", avatarUrl: (result as any).userAvatar || null }
       }]);
-      setCommentContent("");
       toast.success("Comentário enviado!");
       router.refresh();
     } else {
+      setCommentContent(contentToSubmit); // Restaurar se falhar
       toast.error("Erro ao comentar.");
     }
     setIsSubmitting(false);
@@ -108,26 +151,37 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
   };
 
   const handleShare = async () => {
+    const shareUrl = window.location.origin + "/dashboard";
+    const shareText = post.content || "Veja esta postagem da campanha!";
     const shareData = {
       title: "App do Candidato",
-      text: post.content || "Veja esta postagem da campanha!",
-      url: window.location.origin + "/dashboard"
+      text: shareText,
+      url: shareUrl
     };
 
+    // Tentar Navigator Share (Apenas HTTPS)
     if (navigator.share) {
       try {
         await navigator.share(shareData);
+        return;
       } catch (err) {
-        console.log("Erro ao compartilhar:", err);
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(shareData.text + " " + shareData.url);
-        toast.success("Link e texto copiados!");
-      } catch (err) {
-        toast.error("Erro ao copiar.");
+        console.log("Erro ao compartilhar via Navigator:", err);
       }
     }
+
+    // Fallback 1: Clipboard (Apenas HTTPS)
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        toast.success("Link e texto copiados!");
+        return;
+      }
+    } catch (err) {
+      console.log("Erro ao copiar via Clipboard:", err);
+    }
+
+    // Fallback 2: Prompt (Funciona em HTTP/IP)
+    window.prompt("Copie o link abaixo para compartilhar:", `${shareText} ${shareUrl}`);
   };
 
   const handleDownload = () => {
@@ -261,9 +315,34 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
         </Dialog>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
-        
+      <CardContent className="px-4 pb-4">
+        {post.content && (
+          <p className="text-sm whitespace-pre-wrap mb-4">
+            {renderContent(post.content)}
+          </p>
+        )}
+
+        {/* Link Preview Card */}
+        {linkMetadata && !post.imageUrl && !post.videoUrl && (
+          <a 
+            href={linkMetadata.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block border rounded-xl overflow-hidden hover:bg-muted/30 transition-colors mb-4"
+          >
+            {linkMetadata.image && (
+              <img src={linkMetadata.image} alt={linkMetadata.title} className="w-full h-48 object-cover border-b" />
+            )}
+            <div className="p-3 space-y-1">
+              <h4 className="font-bold text-sm line-clamp-1">{linkMetadata.title || "Ver link"}</h4>
+              {linkMetadata.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2">{linkMetadata.description}</p>
+              )}
+              <p className="text-[10px] text-primary truncate">{new URL(linkMetadata.url).hostname}</p>
+            </div>
+          </a>
+        )}
+
         {(post.imageUrl || post.videoUrl) && (
           <div className="relative group cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
             {post.imageUrl && (
@@ -330,10 +409,12 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
 
           <form onSubmit={handleComment} className="flex gap-2 items-center">
             <Input 
+              ref={commentInputRef}
               placeholder="Escreva um comentário..." 
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
               className="h-9 text-xs bg-muted/50 border-none rounded-full"
+              disabled={isSubmitting}
             />
             <Button size="icon" className="h-9 w-9 rounded-full shrink-0" disabled={!commentContent.trim() || isSubmitting}>
               <Send className="w-4 h-4" />

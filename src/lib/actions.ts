@@ -150,6 +150,27 @@ export async function createCommentAction(postId: string, content: string) {
   }
 }
 
+export async function getLinkMetadataAction(url: string) {
+  try {
+    const response = await fetch(url, { next: { revalidate: 3600 } });
+    const html = await response.text();
+    
+    const getMetaTag = (name: string) => {
+      const match = html.match(new RegExp(`<meta[^>]+(?:property|name)=["'](?:og:|twitter:)?${name}["'][^>]+content=["']([^"']+)["']`, 'i'))
+        || html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:|twitter:)?${name}["']`, 'i'));
+      return match ? match[1] : null;
+    };
+
+    const title = getMetaTag('title') || html.match(/<title>([^<]+)<\/title>/i)?.[1];
+    const description = getMetaTag('description');
+    const image = getMetaTag('image');
+
+    return { success: true, metadata: { title, description, image, url } };
+  } catch (error) {
+    return { success: false, error: "Falha ao carregar preview do link." };
+  }
+}
+
 export async function toggleSaveAction(postId: string) {
   const session = await auth();
   if (!session?.user) throw new Error("Não autorizado.");
