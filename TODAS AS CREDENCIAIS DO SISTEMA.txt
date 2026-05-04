@@ -1,0 +1,15 @@
+ACESSO GITHUB - biovittaptc@gmail.com
+
+username github: bdcand1e2
+
+ACESSO SUPABASE - github
+database password: YJps3fUX1u4Y43g2
+
+url
+https://tkokztokfjfguwonkuwh.supabase.co
+
+
+Direct Conect: postgresql://postgres:[YOUR-PASSWORD]@db.tkokztokfjfguwonkuwh.supabase.co:5432/postgres
+
+Session Pooler
+postgresql://postgres.tkokztokfjfguwonkuwh:[YOUR-PASSWORD]@aws-1-sa-east-1.pooler.supabase.com:5432/postgres
