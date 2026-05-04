@@ -1,34 +1,28 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createPostWithMediaAction } from "@/lib/actions";
 import { Send, Image as ImageIcon, Video, Loader2, X, Paperclip } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function CreatePostForm({ userName, avatarUrl }: { userName: string; avatarUrl?: string | null }) {
+  const router = useRouter();
   const [content, setContent] = useState("");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const userInitial = userName.charAt(0).toUpperCase();
 
   const handleFileSelect = (file: File, type: "image" | "video") => {
-    if (type === "image" && file.size > 10 * 1024 * 1024) {
-      toast.error("Imagem muito grande. Máximo 10MB.");
-      return;
-    }
-    if (type === "video" && file.size > 50 * 1024 * 1024) {
-      toast.error("Vídeo muito grande. Máximo 50MB.");
-      return;
-    }
     setMediaFile(file);
     setMediaType(type);
     setMediaPreview(URL.createObjectURL(file));
@@ -43,25 +37,55 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (!content.trim() && !mediaFile) return;
+    setIsPending(true);
 
-    startTransition(async () => {
+    try {
       const formData = new FormData();
       formData.append("content", content.trim());
       if (mediaFile && mediaType) {
         formData.append(mediaType === "image" ? "image" : "video", mediaFile);
+        setUploadProgress(mediaType === "video" ? "Enviando vídeo... aguarde." : "Enviando imagem...");
       }
 
-      const result = await createPostWithMediaAction(formData);
+      const res = await fetch("/api/post", {
+        method: "POST",
+        body: formData,
+      });
+
+      setUploadProgress(null);
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Upload error:", errText);
+        toast.error("Erro ao publicar. Tente novamente.");
+        return;
+      }
+
+      let result: any;
+      try {
+        result = await res.json();
+      } catch {
+        toast.error("Resposta inválida do servidor.");
+        return;
+      }
+
       if (result.success) {
         setContent("");
         clearMedia();
         toast.success("Postagem publicada!");
+        router.refresh();
       } else {
         toast.error(result.error || "Erro ao publicar.");
       }
-    });
+    } catch (err) {
+      console.error("Fetch error:", err);
+      toast.error("Erro de rede. Verifique sua conexão.");
+    } finally {
+      setIsPending(false);
+      setUploadProgress(null);
+    }
   };
 
   return (
@@ -183,7 +207,7 @@ export function CreatePostForm({ userName, avatarUrl }: { userName: string; avat
                 {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Publicando...
+                    {uploadProgress || "Publicando..."}
                   </>
                 ) : (
                   <>

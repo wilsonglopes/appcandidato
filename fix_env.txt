@@ -1,0 +1,8 @@
+DATABASE_URL=postgresql://postgres.lrbykdpwzixmgganirvo:bVviKin6oCgACEGF@aws-1-sa-east-1.pooler.supabase.com:5432/postgres
+AUTH_SECRET=vEryS3cr3tStr1ngF0rNextAuthV5Dev
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=BObZueIsjjRqaqAu2ZZTpWfp8PCL5COOVMDY1mkc_DJIQVZqe47ddLqYaBl9c4Ybr1JsunAsxp4mwx6VGmfoaxs
+VAPID_PRIVATE_KEY=p8fRtP_gbCD3iQyxU74XRCZ_xp90vaeYH0zaRbWrVsA
+VAPID_SUBJECT=mailto:contato@appcandidato.com
+PORT=3001
+NEXTAUTH_URL=https://zm.xmnews.com.br
+AUTH_URL=https://zm.xmnews.com.br
