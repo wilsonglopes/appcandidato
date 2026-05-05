@@ -328,7 +328,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
                  <img src={post.imageUrl} alt="Full preview" className="max-w-full max-h-[85vh] object-contain rounded-lg" />
                )}
                {post.videoUrl && (
-                 <video src={post.videoUrl} controls autoPlay className="max-w-full max-h-[85vh] rounded-lg" />
+                 <video src={post.videoUrl} controls autoPlay preload="metadata" className="max-w-full max-h-[85vh] rounded-lg" />
                )}
             </div>
           </DialogContent>
@@ -370,7 +370,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
             )}
             {post.videoUrl && (
               <div className="relative">
-                <video src={post.videoUrl} className="rounded-xl w-full max-h-96 object-cover" />
+                <video src={post.videoUrl} preload="metadata" className="rounded-xl w-full max-h-96 object-cover" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
                    <div className="bg-white/20 backdrop-blur-md p-4 rounded-full">
                       <MoreVertical className="w-8 h-8 text-white rotate-90" />
