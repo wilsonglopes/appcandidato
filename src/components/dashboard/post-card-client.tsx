@@ -48,6 +48,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
+  const previewClosedByPopState = useRef(false);
 
   const isAdmin = currentUserRole === "ADMIN";
   const isAuthor = currentUserId === post.author.id;
@@ -84,6 +85,28 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
       commentInputRef.current.focus();
     }
   }, [showComments]);
+
+  // Intercepta botão voltar do celular para fechar o modal em vez de sair do app
+  useEffect(() => {
+    if (!isPreviewOpen) return;
+
+    previewClosedByPopState.current = false;
+    window.history.pushState({ modal: 'preview' }, '');
+
+    const handlePopState = () => {
+      previewClosedByPopState.current = true;
+      setIsPreviewOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (!previewClosedByPopState.current) {
+        // Modal fechado pelo X ou clique fora — remove a entrada fantasma do histórico
+        window.history.back();
+      }
+    };
+  }, [isPreviewOpen]);
 
   const handleEdit = async () => {
     if (!editContent.trim() || isActionPending) return;
@@ -232,7 +255,7 @@ export function PostCardClient({ post, initialComments, initialIsSaved, currentU
             <Badge variant="outline" className="text-[10px] h-4 px-1 uppercase">{post.author.role}</Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            {new Date(post.createdAt).toLocaleDateString('pt-BR')}
+            {new Date(post.createdAt).toLocaleDateString('pt-BR')} às {new Date(post.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
         <div className="flex items-center gap-1">

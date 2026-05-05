@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { sendNotificationToAll } from "@/lib/push";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,14 +43,25 @@ export async function POST(request: NextRequest) {
       videoUrl = `/api/uploads/${filename}`;
     }
 
-    await prisma.post.create({
+    const post = await prisma.post.create({
       data: {
         content: content || null,
         imageUrl,
         videoUrl,
         authorId: session.user.id!,
       },
+      include: { author: { select: { name: true } } },
     });
+
+    const notifBody = content
+      ? content.slice(0, 100) + (content.length > 100 ? '...' : '')
+      : imageUrl ? 'Nova foto publicada' : 'Novo vídeo publicado';
+
+    sendNotificationToAll(
+      `📢 Nova publicação de ${post.author.name}`,
+      notifBody,
+      '/dashboard'
+    ).catch(err => console.error('Erro ao enviar push:', err));
 
     return NextResponse.json({ success: true });
   } catch (error) {
