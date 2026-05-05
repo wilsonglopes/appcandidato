@@ -47,7 +47,7 @@ export function PushNotificationManager() {
     }
   }
 
-  if (!isSupported) return null;
+  if (!isSupported || subscription) return null;
 
   return (
     <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-xl border border-primary/10 mb-6">
